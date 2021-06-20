@@ -1,0 +1,226 @@
+{% extends 'base.html' %} {% block content %}
+{% block style %}
+<style>
+  @media screen and (max-width: 765px) {
+    .active-chats {
+      display: none;
+    }
+  }
+
+  .chating{
+    cursor: pointer;
+  }
+
+  .hdn a {
+    text-decoration: none;
+
+  }
+
+  img {
+
+    cursor: pointer
+  }
+
+
+</style>
+
+{% endblock %}
+{% if request.user.is_authenticated%}
+  <section class="big-sec">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="active-chats col-md-4">
+          <div class="d-flex justify-content-between py-3">
+            <div class="dropdown">
+              <h5
+                class="text-center dropdown-toggle"
+                data-toggle="dropdown"
+                style="margin-top: 10px"
+              >
+                {{request.user}}
+              </h5>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{% url 'profile' %}">my profile</a>
+                <a class="dropdown-item" href="{% url 'edit_profile' %}"
+                  >edit profile</a
+                >
+                <a class="dropdown-item" href="{% url 'logout' %}">logout</a>
+              </div>
+            </div>
+            <h3 class="text-center" style="margin-top: 5px">Active Chats</h3>
+          </div>
+          <hr />
+          <div class="chating ac-div"></div>
+        </div>
+        <div class="col-md-8 d-flex flex-column" style="padding: 0">
+          <nav class="msg-area-header navbar navbar-dark bg-primary">
+
+            <div class="chat-now">
+              <img
+                src="{{other_user.img.url}}"
+                alt=""
+                class="rounded-circle"
+              />
+              <label class="name text-white">{{other_user}}</label>
+            </div>
+            <div class="hdn chating w-100 bg-primary" style="margin-top: 60px; display: none;"></div>
+          </nav>
+
+          <div class="chat-area px-3" style="height: 78vh">
+            <div class="msg-content pt-5">
+              {% for message in messages %}
+                {% if message.sender == request.user %}
+                    <div class="d-flex justify-content-end">
+                      <div class="my-msg rounded-pill text-white text-right bg-primary">
+                          {{message.message}}
+                      </div>
+                    </div>
+                  {% else %}
+                  <div class="d-flex justify-content-start">
+                    <div class="other-msg rounded-pill text-dark bg-white">
+                      {{message.message}}
+                    </div>
+                  </div>
+
+                {% endif %}
+              {% endfor %}
+
+            </div>
+            <div class="row">
+              <div class="inp col-md-8">
+                <form
+                  class="texting form-inline my-2 pt-3 pr-5 my-lg-0 pb-3 bg-light"
+                >
+                  <input
+                    class="message-input form-control ml-sm-2"
+                    type="text"
+                    placeholder="اكتب شيأ"
+                  />
+                  <button
+                    class="send-btn btn btn-outline-primary my-2 my-sm-0"
+                    type="submit"
+                  >
+                    ارسال
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% else %}
+    <meta http-equiv="REFRESH" content="0;url=/login/">
+{% endif %}
+
+{% endblock %}
+
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+
+      $('.chating').click(function() {
+        window.location.href = `http://127.0.0.1:8000/chat/${$(this).attr("u-id")}/`;
+
+      });
+
+      $(".chat-now img ").click(function() {
+          $(".hdn").slideToggle();
+      });
+    });
+
+    let message_send_btn = document.querySelector(".send-btn");
+    let message_input = document.querySelector(".message-input");
+    function send_message() {
+        let message = message_input.value;
+        if (message === "") {
+            return;
+        }
+        message_input.value = "";
+        fetch("{% url 'chatroom-ajax' other_user.id %}",
+            {
+                method: "POST",
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(message)
+            }
+        ).then(e => e.json()).then(messages => {
+            for (message of messages) {
+                construct_message(message);
+            }
+        });
+    }
+
+    function load_messages() {
+        fetch("{% url 'chatroom-ajax' other_user.id %}")
+            .then(e => e.json())
+            .then(messages => {
+                for (message of messages) {
+                    construct_message(message);
+                }
+            })
+    }
+
+    function construct_message(message){
+        let messages_container = document.querySelector(".msg-content");
+        let div;
+        if (message.sent){
+            div = sendMessage(message.message);
+        } else {
+            div = recvMessage(message.message);
+        }
+        messages_container.appendChild(div);
+        div.scrollIntoView();
+    }
+    message_send_btn.addEventListener('click', send_message);
+    setInterval(load_messages, 2000);
+    // realtime upadate active users
+    function load_active_users() {
+        fetch("{% url 'active-users' %}")
+            .then(e => e.json())
+            .then(users => {
+              let ac = document.querySelector(".ac-div");
+              let hiden = document.querySelector(".hdn");
+                if (users.length == ac.childNodes.length) {
+                  return;
+                }
+                ac.innerHTML = '';
+                hiden.innerHTML = '';
+                for(user of users){
+                  createUserSlide(user, ac);
+                };
+
+            });
+    }
+    function createUserSlide(js, ac) {
+      let cont = document.createElement("div");
+      let hiden = document.querySelector(".hdn");
+      cont.setAttribute("class", "user d-flex justify-content-between py-3");
+      ac.setAttribute("u-id", js.id);
+      hiden.setAttribute("u-id", js.id);
+      cont.innerHTML = `
+        <div class="d-flex">
+          <img
+            src="${js.img}"
+            class="rounded-circle"
+          />
+          <div class="text-data text-right px-3">
+            <label class="name">${js.user}</label>
+          </div>
+        </div>
+        <hr />
+      `;
+      ac.appendChild(cont);
+      hiden.innerHTML += `
+        <a href="http://127.0.0.1:8000/chat/${js.id}" class="d-block text-right text-white p-3">${js.user}</a>
+      `;
+    }
+    setInterval(load_active_users, 2000);
+
+</script>
+{% endblock %}

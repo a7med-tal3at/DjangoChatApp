@@ -1,0 +1,103 @@
+/**
+ * General syle
+ * */
+body {
+  box-sizing: border-box;
+  overflow-y: hidden;
+}
+
+.big-sec {
+  direction: rtl;
+}
+
+/**
+ * active chats
+ * */
+
+.active-chats {
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.active-chats .user {
+  padding-right: 10px;
+}
+
+.active-chats .user:hover {
+  background-color: #d2d2d2;
+  cursor: pointer;
+}
+
+/**
+ * messge count
+ * */
+
+.msg-num {
+  padding: 20px 0 0 5px;
+}
+
+.msg-num .msg-num-content {
+  display: block;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+/**
+ * chat-area
+ * */
+
+.chat-area {
+  background-color: #eee;
+  overflow-y: scroll;
+  height: 78vh;
+}
+
+.chat-now {
+  position: fixed;
+}
+
+.active-chats .user img,
+.chat-now img {
+  width: 50px;
+  height: 50px;
+}
+
+/**
+ * messge content
+ * */
+
+.msg-area-header {
+  height: 70px;
+}
+.msg-content {
+  height: 20vh !important;
+}
+
+.msg-content .my-msg {
+  padding: 10px;
+  margin-bottom: 5px;
+  width: fit-content;
+  left: 0;
+}
+
+.msg-content .other-msg {
+  padding: 10px;
+  margin-bottom: 5px;
+  width: fit-content;
+}
+
+/**
+ * input
+ * */
+
+.inp {
+  position: fixed;
+  bottom: 0;
+  padding: 0 !important;
+}
+
+.inp input {
+  width: 80% !important;
+}

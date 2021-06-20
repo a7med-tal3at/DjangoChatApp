@@ -1,0 +1,92 @@
+{% extends 'base.html' %} {% block content %}
+{% if request.user.is_authenticated%}
+  <section class="big-sec">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="active-chats col-md-4">
+          <div class="d-flex justify-content-between py-3">
+            <div class="dropdown">
+              <h5
+                class="text-center dropdown-toggle"
+                data-toggle="dropdown"
+                style="margin-top: 10px"
+              >
+                {{request.user}}
+              </h5>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{% url 'profile' %}">my profile</a>
+                <a class="dropdown-item" href="{% url 'edit_profile' %}"
+                  >edit profile</a
+                >
+                <a class="dropdown-item" href="{% url 'logout' %}">logout</a>
+              </div>
+            </div>
+            <h3 class="text-center" style="margin-top: 5px">Active Chats</h3>
+          </div>
+          <hr />
+          <div class="ac-div"></div>
+        </div>
+        <div class="col-md-8 d-flex flex-column" style="padding: 0">
+          <div class="chat-area px-3 d-flex justify-content-center align-items-center" style="height: 100vh">
+            <div class="">
+              <img class="rounded-circle" src="{{user.img.url}}" />
+              <h2 class="text-center py-3">{{user}}</h2>
+              <!-- <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-block">Edit Profile</a> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% else %}
+    <meta http-equiv="REFRESH" content="0;url=/login/">
+{% endif %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+      $('.ac-div').click(function() {
+        window.location.href = `http://127.0.0.1:8000/chat/${$(this).attr("u-id")}/`;
+
+      });
+    });
+
+function load_active_users() {
+    fetch("{% url 'active-users' %}")
+        .then(e => e.json())
+        .then(users => {
+          let ac = document.querySelector(".ac-div");
+            if (users.length == ac.childNodes.length) {
+              return;
+            }
+            ac.innerHTML = '';
+            for(user of users){
+              createUserSlide(user, ac);
+            };
+
+        });
+}
+
+function createUserSlide(js, ac) {
+  let cont = document.createElement("div");
+  cont.setAttribute("class", "user d-flex justify-content-between py-3");
+  ac.setAttribute("u-id", js.id);
+  cont.innerHTML = `
+    <div class="d-flex">
+      <img
+        src="${js.img}"
+        class="rounded-circle"
+      />
+      <div class="text-data text-right px-3">
+        <label class="name">${js.user}</label>
+      </div>
+    </div>
+    <hr />
+  `;
+  ac.appendChild(cont);
+}
+setInterval(load_active_users, 2000)
+</script>
+{% endblock %}

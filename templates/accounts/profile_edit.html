@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+{% block content %}
+<section class="bg-primary">
+  <div class="container d-flex justify-content-center align-items-center p-5">
+    <div class="w-75 p-5 bg-light shadow p-3 mb-5 bg-white rounded">
+      <div class="text-center mb-3">
+        <img
+          src="{{pro.img.url}}"
+          alt=""
+          class="rounded-circle"
+          style="width: 200px; height: 200px"
+        />
+      </div>
+      <form method="POST">
+        {% csrf_token %}
+        {% bootstrap_form uform %}
+        {% bootstrap_form profform %}
+      </form>
+      <div class="mb-3"></div>
+      <a href="{% url 'edit_profile' %}" class="w-100 btn btn-outline-primary">Edit profile</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

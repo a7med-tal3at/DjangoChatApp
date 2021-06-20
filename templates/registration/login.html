@@ -1,0 +1,41 @@
+{% extends "base.html" %} {% load bootstrap4 %} {% block content %}
+
+
+<section class="bg-primary">
+  <div class="container d-flex justify-content-center align-items-center p-5">
+
+    {% if request.user.is_authenticated %}
+      <meta http-equiv="REFRESH" content="0;url=/chat/">
+      {% else %}
+      <div class="form-body w-50 p-3 shadow p-3 mb-5 bg-white rounded">
+        <h3 class="text-primary text-center my-3 font-weight-bold">
+          Django Chat App signin
+        </h3>
+        {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+        {% endif %} {% if next %} {% if user.is_authenticated %}
+        <p>
+          Your account doesn't have access to this page. To proceed, please login
+          with an account that has access.
+        </p>
+        {% else %}
+        <p>Please login to see this page.</p>
+        {% endif %} {% endif %}
+        <form method="POST">
+          {% csrf_token %} {% bootstrap_form form %}
+          <div class="d-flex justify-content-between p-3">
+            <input type="submit" value="login" class="btn btn-primary" />
+
+            <a href="{% url 'signup' %}" style="padding: 10px"
+              >Create an account</a
+            >
+          </div>
+          <input type="hidden" name="next" value="{{ next }}" />
+          <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+        </form>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
